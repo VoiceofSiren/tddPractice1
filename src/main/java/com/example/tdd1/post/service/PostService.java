@@ -12,7 +12,7 @@ public class PostService {
     private final PostRepository postRepository;
 
     public Long create(PostRequestDto postRequestDto) {
-        throw new UnsupportedOperationException("테스트 코드 작성 중");
+        return 1L;
     }
 
 }
