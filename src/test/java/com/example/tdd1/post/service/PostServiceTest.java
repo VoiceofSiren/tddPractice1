@@ -57,7 +57,7 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Post Entity 생성 테스트")
     void test2() {
 
         // given
@@ -78,6 +78,21 @@ class PostServiceTest {
 
         // then
         verify(postRepository).save(any(Post.class));
+    }
+
+    @Test
+    @DisplayName("title 필드에 빈 값이 들어가지 않도록 검증")
+    void test3() {
+
+        // given
+        PostRequestDto postRequestDto = new PostRequestDto();
+        postRequestDto.setTitle("");
+        postRequestDto.setContent("content");
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> {
+            postService.create(postRequestDto);
+        });
     }
 
 }
