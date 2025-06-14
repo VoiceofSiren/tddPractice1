@@ -14,10 +14,13 @@ public class PostService {
 
     public Long create(PostRequestDto postRequestDto) {
 
+        if (postRequestDto.getTitle().isBlank()) {
+            throw new IllegalArgumentException("빈 값 금지");
+        }
+
         Post post = new Post();
         post.setTitle(postRequestDto.getTitle());
         post.setContent(post.getContent());
-
 
         return postRepository.save(post).getId();
     }
