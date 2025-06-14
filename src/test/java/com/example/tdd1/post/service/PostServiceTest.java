@@ -39,6 +39,14 @@ class PostServiceTest {
         postRequestDto.setTitle("title1");
         postRequestDto.setContent("content1");
 
+        // PostService.create 내부 코드 작성 후 추가 시 이 테스트 메서드는 실패함.
+        //
+        Post savedPost = new Post();
+        ReflectionTestUtils.setField(savedPost, "id", 1L);
+        savedPost.setTitle("title");
+        savedPost.setContent("content");
+        given(postRepository.save(any(Post.class))).willReturn(savedPost);
+
         // when
         // 타게팅 대상 작성
         // create(PostRequestDto): Long
