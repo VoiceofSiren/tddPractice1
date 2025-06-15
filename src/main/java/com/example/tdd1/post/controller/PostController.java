@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 public class PostController {
@@ -21,11 +23,15 @@ public class PostController {
     public ResponseEntity<?> createPost(@RequestBody PostRequestDto postRequestDto) {
 
         // tdd 구현
+        Long resultId = postService.create(postRequestDto);
+
+        // HTTP Body
+        Map<String, Object> responseBody = Map.of("id", resultId);
 
         // HTTP Header를 이용하여 test1()이 성공하도록 구현
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(new MediaType("application", "json"));
 
-        return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(responseBody, httpHeaders, HttpStatus.OK);
     }
 }
