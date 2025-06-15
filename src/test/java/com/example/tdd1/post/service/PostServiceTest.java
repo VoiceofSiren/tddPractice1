@@ -77,6 +77,7 @@ class PostServiceTest {
         postService.create(postRequestDto);
 
         // then
+            // postRepository.save() 메서드를 사용하였는지 검증
         verify(postRepository).save(any(Post.class));
     }
 

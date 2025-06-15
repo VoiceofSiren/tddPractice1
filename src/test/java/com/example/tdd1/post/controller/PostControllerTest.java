@@ -12,9 +12,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 // Controller 테스트를 위한 애너테이션
 @WebMvcTest(controllers = PostController.class)
@@ -29,7 +31,7 @@ class PostControllerTest {
 
     // api method
     @Test
-    @DisplayName("POST /post 테스트 코드 작성")
+    @DisplayName("POST /post 200 OK 응답 확인을 위한 테스트 코드")
     void test1() throws Exception {
 
         // given
@@ -39,14 +41,42 @@ class PostControllerTest {
 
         // when & then
         mockMvc.perform(
-                // POST 요청
-                post("/post")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(postRequestDto))
+                        // POST 요청
+                        post("/post")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(new ObjectMapper().writeValueAsString(postRequestDto))
                 )
                 // 응답
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
 
+    @Test
+    @DisplayName("POST /post 테스트 코드 작성")
+    void test2() throws Exception {
+
+        // given
+        PostRequestDto postRequestDto = new PostRequestDto();
+        postRequestDto.setTitle("title");
+        postRequestDto.setContent("content");
+
+            // 아래의 andExpect(jsonPath("$.id").value(1)); 코드와 관련이 있음.
+        given(postService.create(any(PostRequestDto.class))).willReturn(1L);
+
+        // when & then
+        mockMvc.perform(
+                        // POST 요청
+                        post("/post")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(new ObjectMapper().writeValueAsString(postRequestDto))
+                )
+                // 응답
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    // JSON Body에 있는 id 필드의 값이 1인 걍우
+                .andExpect(jsonPath("$.id").value(1));
+
+         // postService.create() 메서드를 사용하였는지 검증
+        verify(postService).create(any(PostRequestDto.class));
     }
 }
