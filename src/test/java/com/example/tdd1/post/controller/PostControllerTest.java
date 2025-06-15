@@ -2,7 +2,6 @@ package com.example.tdd1.post.controller;
 
 import com.example.tdd1.post.dto.PostRequestDto;
 import com.example.tdd1.post.service.PostService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +40,7 @@ class PostControllerTest {
         // when & then
         mockMvc.perform(
                 // POST 요청
-                post("post")
+                post("/post")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(postRequestDto))
                 )
