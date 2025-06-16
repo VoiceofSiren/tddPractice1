@@ -5,6 +5,6 @@ public class ValidationUtil {
     // email validation
     public static boolean isEmail(String email) {
 
-        throw new UnsupportedOperationException("테스트 코드 작성 중");
+        return email != null && email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
     }
 }
