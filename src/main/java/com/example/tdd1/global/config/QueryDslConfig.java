@@ -1,4 +1,4 @@
-package com.example.tdd1.config;
+package com.example.tdd1.global.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

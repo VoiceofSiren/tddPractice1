@@ -2,6 +2,7 @@ package com.example.tdd1.post.controller;
 
 import com.example.tdd1.post.dto.PostRequestDto;
 import com.example.tdd1.post.service.PostService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,18 +42,18 @@ class PostControllerTest {
 
         // when & then
         mockMvc.perform(
-                        // POST 요청
-                        post("/post")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(new ObjectMapper().writeValueAsString(postRequestDto))
-                )
+                // POST 요청
+                post("/post")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(postRequestDto))
+        )
                 // 응답
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
-    @DisplayName("POST /post 테스트 코드 작성")
+    @DisplayName("PostService.create() 로직 확인을 위한 테스트 코드")
     void test2() throws Exception {
 
         // given
@@ -65,11 +66,11 @@ class PostControllerTest {
 
         // when & then
         mockMvc.perform(
-                        // POST 요청
-                        post("/post")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(new ObjectMapper().writeValueAsString(postRequestDto))
-                )
+                // POST 요청
+                post("/post")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(postRequestDto))
+        )
                 // 응답
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -78,5 +79,28 @@ class PostControllerTest {
 
          // postService.create() 메서드를 사용하였는지 검증
         verify(postService).create(any(PostRequestDto.class));
+    }
+
+    @Test
+    @DisplayName("PostService에서 title에 빈 값 입력 시 PostController로 전파되는 예외를 처리하는 테스트")
+    void test3() throws Exception {
+
+        // given
+        PostRequestDto postRequestDto = new PostRequestDto();
+        postRequestDto.setTitle("");
+        postRequestDto.setContent("content");
+
+        given(postService.create(any(PostRequestDto.class))).willThrow(IllegalArgumentException.class);
+
+        // when & then
+        mockMvc.perform(
+                // post 요청
+                post("/post")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(postRequestDto))
+        )
+                // 응답
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 }

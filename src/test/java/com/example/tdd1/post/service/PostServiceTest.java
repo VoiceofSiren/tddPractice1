@@ -82,7 +82,7 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("title 필드에 빈 값이 들어가지 않도록 검증")
+    @DisplayName("title 필드에 빈 값이 들어가지 않도록 예외 처리")
     void test3() {
 
         // given
