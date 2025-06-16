@@ -49,13 +49,14 @@ class PostControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(postRequestDto))
-        )
+                )
                 // 응답
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     @DisplayName("PostService.create() 로직 확인을 위한 테스트 코드")
     void test2() throws Exception {
 
@@ -71,9 +72,10 @@ class PostControllerTest {
         mockMvc.perform(
                 // POST 요청
                 post("/post")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(postRequestDto))
-        )
+                )
                 // 응답
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -85,6 +87,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     @DisplayName("PostService에서 title에 빈 값 입력 시 PostController로 전파되는 예외를 처리하는 테스트")
     void test3() throws Exception {
 
@@ -99,9 +102,10 @@ class PostControllerTest {
         mockMvc.perform(
                 // post 요청
                 post("/post")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(postRequestDto))
-        )
+                )
                 // 응답
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
