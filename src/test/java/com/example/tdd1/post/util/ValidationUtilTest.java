@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// Mock 객체 없이 바로 작성
 class ValidationUtilTest {
 
     @Test

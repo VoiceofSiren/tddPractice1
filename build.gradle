@@ -48,6 +48,10 @@ dependencies {
 
 	// Thymeleaf
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	// Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-security:3.2.2'
+	testImplementation 'org.springframework.security:spring-security-test'
 }
 
 tasks.named('test') {
