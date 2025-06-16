@@ -1,4 +1,4 @@
-package com.example.tdd1.post.controller;
+package com.example.tdd1.post.controller.api;
 
 import com.example.tdd1.post.dto.PostRequestDto;
 import com.example.tdd1.post.service.PostService;

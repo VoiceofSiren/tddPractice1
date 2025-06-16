@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Post Page</title>
+</head>
+<body>
+<h1>게시글 작성</h1>
+<form th:action="@{/page}" method="post">
+    <label for="title">제목:</label>
+    <input type="text" id="title" name="title" required><br><br>
+
+    <label for="content">내용:</label>
+    <textarea id="content" name="content" rows="5" cols="30" required></textarea><br><br>
+
+    <button type="submit">작성</button>
+</form>
+
+<hr>
+
+<h2>게시글 목록</h2>
+<ul>
+    <li th:each="post : ${POSTLIST}">
+        <strong th:text="${post.title}">제목</strong><br>
+        <span th:text="${post.content}">내용</span>
+    </li>
+</ul>
+</body>
+</html>
