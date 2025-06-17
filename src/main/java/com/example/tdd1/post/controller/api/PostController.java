@@ -7,9 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -33,5 +31,10 @@ public class PostController {
         httpHeaders.setContentType(new MediaType("application", "json"));
 
         return new ResponseEntity<>(responseBody, httpHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping("/post/{id}")
+    public ResponseEntity<?> readPost(@PathVariable (name = "id") Long id) {
+        throw new UnsupportedOperationException("테스트 코드 작성 중");
     }
 }

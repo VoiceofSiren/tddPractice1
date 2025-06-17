@@ -1,6 +1,8 @@
 package com.example.tdd1.post.controller;
 
 import com.example.tdd1.post.dto.PostRequestDto;
+import com.example.tdd1.post.entity.Post;
+import com.example.tdd1.post.repository.PostRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 // 통합 테스트를 위한 애너테이션, Mock 객체가 아닌 실제 객체를 사용
@@ -28,12 +30,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PostControllerIntegrationTest {
 
     @Autowired
+    // 가짜 클라이언트 객체
     MockMvc mockMvc;
+
+    @Autowired
+    PostRepository postRepository;
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @DisplayName("POST /post API 통합 테스트")
-    void test1() throws Exception{
+    void test1() throws Exception {
 
         // given
         PostRequestDto postRequestDto = new PostRequestDto();
@@ -41,6 +47,7 @@ public class PostControllerIntegrationTest {
         postRequestDto.setContent("content");
 
         // when & then
+            // API 요청 수행
         mockMvc.perform(
                 // POST 요청
                 post("/post")
@@ -54,4 +61,27 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").exists());
 
     }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @DisplayName("GET /post API 통합 테스트")
+    void test2() throws Exception {
+
+        // given
+        Post post = new Post();
+        post.setTitle("title");
+        post.setContent("content");
+        Long savedId = postRepository.save(post).getId();
+
+        // when & then
+        mockMvc.perform(
+                get("/post/" + savedId)
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(savedId))
+                .andExpect(jsonPath("$.title").value("title"))
+                .andExpect(jsonPath("$.content").value("content"));
+    }
+
 }
