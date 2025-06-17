@@ -64,19 +64,24 @@ public class PostControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    @DisplayName("GET /post API 통합 테스트")
+    @DisplayName("GET /post/{id} API 통합 테스트")
     void test2() throws Exception {
 
         // given
         Post post = new Post();
         post.setTitle("title");
         post.setContent("content");
+
+            // DB에 데이터가 저장되어 있어야 테스트를 통과하므로 아래의 코드를 추가
         Long savedId = postRepository.save(post).getId();
 
         // when & then
         mockMvc.perform(
+                // GET 요청
                 get("/post/" + savedId)
-        )
+                        .with(csrf())
+                )
+                // 응답
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(savedId))

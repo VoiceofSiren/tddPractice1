@@ -1,6 +1,8 @@
 package com.example.tdd1.post.controller.api;
 
 import com.example.tdd1.post.dto.PostRequestDto;
+import com.example.tdd1.post.dto.PostResponseDto;
+import com.example.tdd1.post.entity.Post;
 import com.example.tdd1.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -35,6 +37,13 @@ public class PostController {
 
     @GetMapping("/post/{id}")
     public ResponseEntity<?> readPost(@PathVariable (name = "id") Long id) {
-        throw new UnsupportedOperationException("테스트 코드 작성 중");
+
+        PostResponseDto postResponseDto = postService.read(id);
+
+        // HTTP Header를 이용하여 test2()가 성공하도록 구현
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(new MediaType("application", "json"));
+
+        return new ResponseEntity<>(postResponseDto, httpHeaders, HttpStatus.OK);
     }
 }
