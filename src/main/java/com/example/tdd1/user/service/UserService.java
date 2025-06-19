@@ -1,11 +1,15 @@
 package com.example.tdd1.user.service;
 
-import com.example.tdd1.user.dto.UserCreateRequestDto;
-import com.example.tdd1.user.dto.UserCreateResponseDto;
+import com.example.tdd1.user.dto.request.UserCreateRequestDto;
+import com.example.tdd1.user.dto.response.UserCreateResponseDto;
+import com.example.tdd1.user.dto.response.UserReadResponseDto;
 import com.example.tdd1.user.entity.User;
 import com.example.tdd1.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -13,6 +17,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     public UserCreateResponseDto createUser(UserCreateRequestDto userCreateRequestDto) {
 
         User user = new User();
@@ -28,5 +33,13 @@ public class UserService {
                 .password(savedUser.getPassword())
                 .role(savedUser.getRole())
                 .build();
+    }
+
+    @Transactional
+    public List<UserReadResponseDto> readUsers() {
+
+        // TODO: 단위 테스트 코드 작성
+
+        throw new UnsupportedOperationException("테스트 코드 작성 중");
     }
 }

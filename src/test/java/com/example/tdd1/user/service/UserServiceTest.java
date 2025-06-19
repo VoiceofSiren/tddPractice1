@@ -1,7 +1,7 @@
 package com.example.tdd1.user.service;
 
-import com.example.tdd1.user.dto.UserCreateRequestDto;
-import com.example.tdd1.user.dto.UserCreateResponseDto;
+import com.example.tdd1.user.dto.request.UserCreateRequestDto;
+import com.example.tdd1.user.dto.response.UserCreateResponseDto;
 import com.example.tdd1.user.entity.User;
 import com.example.tdd1.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +33,7 @@ class UserServiceTest {
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    @DisplayName("UserService.createUser() 테스트 코드")
+    @DisplayName("UserService.createUser() 단위 테스트 코드")
     void test1() {
 
         // given
@@ -60,6 +60,13 @@ class UserServiceTest {
         assertTrue(userCreateResponseDto.getUsername().equals("user1"));
         assertTrue(userCreateResponseDto.getPassword().equals("password1"));
         assertTrue(userCreateResponseDto.getRole().equals("role1"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @DisplayName("UserService.readUsers() 단위 테스트 코드")
+    void test2() {
+
     }
 
 }
