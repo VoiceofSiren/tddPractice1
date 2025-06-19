@@ -41,9 +41,9 @@ class UserServiceTest {
         userCreateRequestDto.setUsername("user1");
         userCreateRequestDto.setPassword("password1");
         userCreateRequestDto.setRole("role1");
+
             // UserRepository의 mock 객체가 원본처럼 동작하지 않을 수 있으므로
             // 아래와 같이 꾸며줘야 함.
-
         User savedUser = new User();
         ReflectionTestUtils.setField(savedUser, "id", 1L);
         savedUser.setUsername(userCreateRequestDto.getUsername());
