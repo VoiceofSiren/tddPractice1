@@ -56,6 +56,9 @@ public class UserControllerIntegrationTest {
                 // 응답
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").exists());
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.username").value("user1"))
+                .andExpect(jsonPath("$.password").value("password1"))
+                .andExpect(jsonPath("$.role").value("ROLE1"));
     }
 }
