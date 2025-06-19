@@ -1,4 +1,4 @@
-package com.example.tdd1.user.dto;
+package com.example.tdd1.user.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

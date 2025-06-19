@@ -1,7 +1,7 @@
 package com.example.tdd1.user.controller;
 
 import com.example.tdd1.user.controller.api.AuthController;
-import com.example.tdd1.user.dto.UserCreateRequestDto;
+import com.example.tdd1.user.dto.request.UserCreateRequestDto;
 import com.example.tdd1.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

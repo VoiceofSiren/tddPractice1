@@ -1,7 +1,7 @@
 package com.example.tdd1.user.controller.api;
 
-import com.example.tdd1.user.dto.UserCreateRequestDto;
-import com.example.tdd1.user.dto.UserCreateResponseDto;
+import com.example.tdd1.user.dto.request.UserCreateRequestDto;
+import com.example.tdd1.user.dto.response.UserCreateResponseDto;
 import com.example.tdd1.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

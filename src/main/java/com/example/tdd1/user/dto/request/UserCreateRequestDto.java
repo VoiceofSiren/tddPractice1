@@ -1,4 +1,4 @@
-package com.example.tdd1.user.dto;
+package com.example.tdd1.user.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;

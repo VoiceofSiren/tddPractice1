@@ -1,7 +1,7 @@
 package com.example.tdd1.user.integration;
 
 import com.example.tdd1.post.repository.PostRepository;
-import com.example.tdd1.user.dto.UserCreateRequestDto;
+import com.example.tdd1.user.dto.request.UserCreateRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
