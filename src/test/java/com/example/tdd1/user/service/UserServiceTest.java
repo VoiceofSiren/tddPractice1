@@ -2,6 +2,7 @@ package com.example.tdd1.user.service;
 
 import com.example.tdd1.user.dto.request.UserCreateRequestDto;
 import com.example.tdd1.user.dto.response.UserCreateResponseDto;
+import com.example.tdd1.user.dto.response.UserReadResponseDto;
 import com.example.tdd1.user.entity.User;
 import com.example.tdd1.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +59,7 @@ class UserServiceTest {
         UserCreateResponseDto userCreateResponseDto = userService.createUser(userCreateRequestDto);
 
         // then
+        verify(userRepository).save(any(User.class));
         assertTrue(userCreateResponseDto.getId().equals(1L));
         assertTrue(userCreateResponseDto.getUsername().equals("user1"));
         assertTrue(userCreateResponseDto.getPassword().equals("password1"));
@@ -67,6 +71,34 @@ class UserServiceTest {
     @DisplayName("UserService.readUsers() 단위 테스트 코드")
     void test2() {
 
+        // given
+        UserReadResponseDto responseDto1 = UserReadResponseDto.builder()
+                .id(1L)
+                .username("user1")
+                .password("password1")
+                .role("ROLE1")
+                .build();
+
+        UserReadResponseDto responseDto2 = UserReadResponseDto.builder()
+                .id(2L)
+                .username("user2")
+                .password("password2")
+                .role("ROLE2")
+                .build();
+
+
+        List<UserReadResponseDto> userReadResponseDtoList = List.of(responseDto1, responseDto2);
+
+        given(userRepository.findUsers()).willReturn(userReadResponseDtoList);
+
+        // when
+        List<UserReadResponseDto> result = userService.readUsers();
+
+        // then
+        verify(userRepository).findUsers();
+        assertTrue(result.size() == 2);
+        assertTrue(result.get(0).getId().equals(1L));
+        assertTrue(result.get(1).getId().equals(2L));
     }
 
 }
