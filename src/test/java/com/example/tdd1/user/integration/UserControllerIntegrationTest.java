@@ -99,7 +99,6 @@ public class UserControllerIntegrationTest {
                         .andExpect(jsonPath("$[1].password").value("password2"))
                         .andExpect(jsonPath("$[1].role").value("ROLE2"));
 
-
     }
 
 }
