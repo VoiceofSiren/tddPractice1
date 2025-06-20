@@ -38,7 +38,6 @@ public class UserService {
     @Transactional
     public List<UserReadResponseDto> readUsers() {
 
-        // TODO: 단위 테스트 코드 작성
         return userRepository.findUsers();
     }
 }
