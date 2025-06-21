@@ -11,15 +11,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final UserService userService;
 
-    @PostMapping("/auth/signUp")
+    @PostMapping("/signUp")
     public ResponseEntity<?> signUp(@RequestBody UserCreateRequestDto userCreateRequestDto) {
 
         UserCreateResponseDto userCreateResponseDto = userService.createUser(userCreateRequestDto);
@@ -30,7 +32,7 @@ public class AuthController {
         return new ResponseEntity<>(userCreateResponseDto, httpHeaders, HttpStatus.OK);
     }
 
-    @PostMapping("/auth/logIn")
+    @PostMapping("/logIn")
     public ResponseEntity<?> logIn(@RequestBody UserLoginRequestDto userLoginRequestDto) {
 
         throw new UnsupportedOperationException("테스트 코드 작성 중");
