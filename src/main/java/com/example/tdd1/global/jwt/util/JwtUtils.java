@@ -20,11 +20,17 @@ public class JwtUtils {
     }
 
     public Claims extractPayload(String token) {
-        return Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
+        return Jwts
+                // secretKey를 이용하여 파싱
+                .parser().verifyWith(secretKey)
+                // token 값을 이용
+                .build().parseSignedClaims(token)
+                // payload 추출
                 .getPayload();
+    }
+
+    public String extractCategory(String token) {
+        return extractPayload(token).get("category", String.class);
     }
 
     public String extractUsername(String token) {
@@ -39,8 +45,9 @@ public class JwtUtils {
         return extractPayload(token).getExpiration().before(new Date());
     }
 
-    public String generateJwt(String username, String role, Long expirationMillis) {
+    public String generateJwt(String category, String username, String role, Long expirationMillis) {
         return Jwts.builder()
+                .claim("category", category)
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
