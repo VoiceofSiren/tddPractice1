@@ -1,6 +1,7 @@
 package com.example.tdd1.user.controller.api;
 
 import com.example.tdd1.user.dto.request.UserCreateRequestDto;
+import com.example.tdd1.user.dto.request.UserLoginRequestDto;
 import com.example.tdd1.user.dto.response.UserCreateResponseDto;
 import com.example.tdd1.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,12 @@ public class AuthController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
         return new ResponseEntity<>(userCreateResponseDto, httpHeaders, HttpStatus.OK);
+    }
+
+    @PostMapping("/auth/logIn")
+    public ResponseEntity<?> logIn(@RequestBody UserLoginRequestDto userLoginRequestDto) {
+
+        throw new UnsupportedOperationException("테스트 코드 작성 중");
     }
 
 
