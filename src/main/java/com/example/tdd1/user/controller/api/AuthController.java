@@ -32,11 +32,4 @@ public class AuthController {
         return new ResponseEntity<>(userCreateResponseDto, httpHeaders, HttpStatus.OK);
     }
 
-    @PostMapping("/logIn")
-    public ResponseEntity<?> logIn(@RequestBody UserLoginRequestDto userLoginRequestDto) {
-
-        throw new UnsupportedOperationException("테스트 코드 작성 중");
-    }
-
-
 }
