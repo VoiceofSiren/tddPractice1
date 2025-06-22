@@ -44,11 +44,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         String role = authorities.stream().findFirst().get().getAuthority();
 
-        String accessToken = jwtUtils.generateJwt("access", username, role, 600000L);       // 만료 시간: 10m
-        String refreshToken = jwtUtils.generateJwt("refresh", username, role, 86400000L);   // 만료 시간: 24h
+        String accessToken = jwtUtils.issueJwt("access", username, role, 600000L);       // 만료 시간: 10m
+        String refreshToken = jwtUtils.issueJwt("refresh", username, role, 86400000L);   // 만료 시간: 24h
 
-        response.addHeader("Authorization", "Bearer " + accessToken);
-        response.addCookie(createCookie("refresh", refreshToken));
+        response.addHeader("accessToken", accessToken);
+        response.addCookie(createCookie("refreshToken", refreshToken));
         response.setStatus(HttpStatus.OK.value());
     }
 
