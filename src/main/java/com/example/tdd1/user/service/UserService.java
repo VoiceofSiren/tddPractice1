@@ -6,6 +6,7 @@ import com.example.tdd1.user.dto.response.UserReadResponseDto;
 import com.example.tdd1.user.entity.User;
 import com.example.tdd1.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,13 +17,14 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
     public UserCreateResponseDto createUser(UserCreateRequestDto userCreateRequestDto) {
 
         User user = new User();
         user.setUsername(userCreateRequestDto.getUsername());
-        user.setPassword(userCreateRequestDto.getPassword());
+        user.setPassword(passwordEncoder.encode(userCreateRequestDto.getPassword()));
         user.setRole(userCreateRequestDto.getRole());
 
         User savedUser = userRepository.save(user);
