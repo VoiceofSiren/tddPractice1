@@ -29,15 +29,15 @@ public class JwtUtils {
                 .getPayload();
     }
 
-    public String extractCategory(String token) {
+    public String getCategory(String token) {
         return extractPayload(token).get("category", String.class);
     }
 
-    public String extractUsername(String token) {
+    public String getUsername(String token) {
         return extractPayload(token).get("username", String.class);
     }
 
-    public String extractRole(String token) {
+    public String getRole(String token) {
         return extractPayload(token).get("role", String.class);
     }
 
@@ -45,7 +45,7 @@ public class JwtUtils {
         return extractPayload(token).getExpiration().before(new Date());
     }
 
-    public String generateJwt(String category, String username, String role, Long expirationMillis) {
+    public String issueJwt(String category, String username, String role, Long expirationMillis) {
         return Jwts.builder()
                 .claim("category", category)
                 .claim("username", username)
