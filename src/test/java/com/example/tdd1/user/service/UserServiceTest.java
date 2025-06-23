@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -34,6 +36,9 @@ class UserServiceTest {
     @Mock
     UserRepository userRepository;
 
+    @Spy
+    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @DisplayName("UserService.createUser() 단위 테스트 코드")
@@ -42,7 +47,8 @@ class UserServiceTest {
         // given
         UserCreateRequestDto userCreateRequestDto = new UserCreateRequestDto();
         userCreateRequestDto.setUsername("user1");
-        userCreateRequestDto.setPassword("password1");
+        String plainPassword = "password1";
+        userCreateRequestDto.setPassword(plainPassword);
         userCreateRequestDto.setRole("role1");
 
             // UserRepository의 mock 객체가 원본처럼 동작하지 않을 수 있으므로
@@ -50,8 +56,10 @@ class UserServiceTest {
         User savedUser = new User();
         ReflectionTestUtils.setField(savedUser, "id", 1L);
         savedUser.setUsername(userCreateRequestDto.getUsername());
-        savedUser.setPassword(userCreateRequestDto.getPassword());
+        String encodedPassword = "$2a$10$jjXKMN6hzbOJWYF2.0llM.8sHYOM.D8UtXpZPNNwadAMaLvlBSds6";
+        savedUser.setPassword(encodedPassword);
         savedUser.setRole(userCreateRequestDto.getRole());
+        given(passwordEncoder.encode(plainPassword)).willReturn(encodedPassword);
         given(userRepository.save(any(User.class))).willReturn(savedUser);
 
         // when
@@ -60,10 +68,12 @@ class UserServiceTest {
 
         // then
         verify(userRepository).save(any(User.class));
-        assertTrue(userCreateResponseDto.getId().equals(1L));
-        assertTrue(userCreateResponseDto.getUsername().equals("user1"));
-        assertTrue(userCreateResponseDto.getPassword().equals("password1"));
-        assertTrue(userCreateResponseDto.getRole().equals("role1"));
+        assertEquals(1L, userCreateResponseDto.getId());
+        assertEquals("user1", userCreateResponseDto.getUsername());
+        System.out.println("encoded pw: " + encodedPassword);
+        System.out.println("user pw: " + userCreateRequestDto.getPassword());
+        assertTrue(passwordEncoder.matches(plainPassword, userCreateResponseDto.getPassword()));
+        assertEquals("role1", userCreateResponseDto.getRole());
     }
 
     @Test

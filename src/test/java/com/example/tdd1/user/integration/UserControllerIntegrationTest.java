@@ -9,12 +9,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -35,6 +40,9 @@ public class UserControllerIntegrationTest {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    BCryptPasswordEncoder passwordEncoder;
+
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @DisplayName("POST /auth/signUp API 통합 테스트")
@@ -43,7 +51,7 @@ public class UserControllerIntegrationTest {
         // given
         UserCreateRequestDto userCreateRequestDto = new UserCreateRequestDto();
         userCreateRequestDto.setUsername("user1");
-        userCreateRequestDto.setPassword("password1");
+        userCreateRequestDto.setPassword(passwordEncoder.encode("password1"));
         userCreateRequestDto.setRole("ROLE1");
 
         // when & then
@@ -59,7 +67,6 @@ public class UserControllerIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.username").value("user1"))
-                .andExpect(jsonPath("$.password").value("password1"))
                 .andExpect(jsonPath("$.role").value("ROLE1"));
     }
 
@@ -69,15 +76,14 @@ public class UserControllerIntegrationTest {
     void test2() throws Exception {
 
         // given
-
         User user1 = new User();
         user1.setUsername("user1");
-        user1.setPassword("password1");
+        user1.setPassword(passwordEncoder.encode("password1"));
         user1.setRole("ROLE1");
 
         User user2 = new User();
         user2.setUsername("user2");
-        user2.setPassword("password2");
+        user2.setPassword(passwordEncoder.encode("password2"));
         user2.setRole("ROLE2");
 
         userRepository.save(user1);
@@ -93,12 +99,15 @@ public class UserControllerIntegrationTest {
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.length()").value(2))
                         .andExpect(jsonPath("$[0].username").value("user1"))
-                        .andExpect(jsonPath("$[0].password").value("password1"))
                         .andExpect(jsonPath("$[0].role").value("ROLE1"))
                         .andExpect(jsonPath("$[1].username").value("user2"))
-                        .andExpect(jsonPath("$[1].password").value("password2"))
                         .andExpect(jsonPath("$[1].role").value("ROLE2"));
 
+        // 비밀번호 암호화 match 확인
+        List<User> users = userRepository.findAll(Sort.by("username"));
+
+        assertThat(passwordEncoder.matches("password1", users.get(0).getPassword())).isTrue();
+        assertThat(passwordEncoder.matches("password2", users.get(1).getPassword())).isTrue();
     }
 
 }
