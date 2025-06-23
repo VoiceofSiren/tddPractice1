@@ -1,5 +1,6 @@
 package com.example.tdd1.global.jwt.controller;
 
+import com.example.tdd1.global.jwt.util.CookieUtils;
 import com.example.tdd1.global.jwt.util.JwtUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
@@ -53,9 +54,11 @@ public class ReissueController {
         String role = jwtUtils.getRole(refreshToken);
 
         // Reissue new access token
-        String newAccessToken = jwtUtils.issueJwt("access", username, role, 600000L);
+        String newAccessToken = jwtUtils.issueJwt("access", username, role, 600000L);       // 만료 시간: 10m
+        String newRefreshToken = jwtUtils.issueJwt("refresh", username, role, 86400000L);   // 만료 시간: 24h
 
         response.setHeader("access", newAccessToken);
+        response.addCookie(CookieUtils.createCookie("refresh", newRefreshToken));
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

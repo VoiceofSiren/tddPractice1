@@ -1,9 +1,13 @@
 package com.example.tdd1.global.jwt.filter;
 
+import com.example.tdd1.global.jwt.util.CookieUtils;
 import com.example.tdd1.global.jwt.util.JwtUtils;
 import com.example.tdd1.user.dto.CustomUserDetails;
+import com.example.tdd1.user.dto.request.UserLoginRequestDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,8 +18,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -32,8 +38,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
+        // form-data 방식
+//        String username = obtainUsername(request);
+//        String password = obtainPassword(request);
+
+        // application/json 방식
+        UserLoginRequestDto userLoginRequestDto = new UserLoginRequestDto();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ServletInputStream inputStream = request.getInputStream();
+            String messageBody = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+            userLoginRequestDto = objectMapper.readValue(messageBody, UserLoginRequestDto.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        String username = userLoginRequestDto.getUsername();
+        String password = userLoginRequestDto.getPassword();
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password, null);
         return authenticationManager.authenticate(authenticationToken);
@@ -53,7 +74,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         System.out.println("AccessToken and refreshToken are issued.");
 
         response.addHeader("accessToken", accessToken);
-        response.addCookie(createCookie("refreshToken", refreshToken));
+        response.addCookie(CookieUtils.createCookie("refreshToken", refreshToken));
         response.setStatus(HttpStatus.OK.value());
 
     }
@@ -64,17 +85,4 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setStatus(401);
     }
 
-    /**
-     *
-     * @param key: 문자열 "refresh"
-     * @param value: refreshToken 값 (JWT)
-     * @return cookie
-     */
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        // cookie.setSecure(true);             // HTTPS 설정
-        cookie.setMaxAge(24 * 60 * 60);     // 만료 시간: 24h
-        cookie.setHttpOnly(true);           // JS 공격 방지
-        return cookie;
-    }
 }
