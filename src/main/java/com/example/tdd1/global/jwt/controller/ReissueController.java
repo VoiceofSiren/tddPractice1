@@ -22,7 +22,7 @@ public class ReissueController {
 
     private final RefreshTokenService refreshTokenService;
 
-    @PostMapping("/reissue")
+    @PostMapping("/refresh/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 
         // Get refresh token

@@ -41,7 +41,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/reissue").permitAll()
+                        .requestMatchers("/refresh/reissue").permitAll()
                         .requestMatchers("/users/**").authenticated()
                         .anyRequest().authenticated());
 
