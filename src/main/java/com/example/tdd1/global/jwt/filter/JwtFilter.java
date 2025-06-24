@@ -1,5 +1,6 @@
 package com.example.tdd1.global.jwt.filter;
 
+import com.example.tdd1.global.jwt.util.CookieUtils;
 import com.example.tdd1.global.jwt.util.JwtUtils;
 import com.example.tdd1.user.dto.CustomUserDetails;
 import com.example.tdd1.user.entity.User;
@@ -25,6 +26,7 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String accessToken = request.getHeader("accessToken");
+        String refreshToken = CookieUtils.getRefreshTokenFromCookie(request);
 
         if (accessToken == null) {
             // 권한이 필요 없는 요청일 수도 있기 때문에 다음 필터로 넘기는 작업을 수행
@@ -33,14 +35,12 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         // Access Token 만료 여부 확인
-        // 다음 필터로 넘기지 않음.
+        // 다음 단계의 필터로 넘기지 않음.
         try {
             jwtUtils.expires(accessToken);
         } catch (ExpiredJwtException e) {
-
-            // Response Body
             PrintWriter writer = response.getWriter();
-            writer.print("access token expired");
+            writer.print("JwtFilter: access token expired");
 
             // Response Status Code
             // Front-end 측과 협의된 상태 코드 필요
@@ -62,8 +62,15 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String username = jwtUtils.getUsername(accessToken);
-        String role = jwtUtils.getRole(accessToken);
+        setAuthentication(accessToken);
+
+        filterChain.doFilter(request, response);
+    }
+
+    private void setAuthentication(String token) {
+
+        String username = jwtUtils.getUsername(token);
+        String role = jwtUtils.getRole(token);
 
         User user = new User();
         user.setUsername(username);
@@ -73,7 +80,5 @@ public class JwtFilter extends OncePerRequestFilter {
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
         SecurityContextHolder.getContextHolderStrategy().getContext().setAuthentication(authenticationToken);
-
-        filterChain.doFilter(request, response);
     }
 }

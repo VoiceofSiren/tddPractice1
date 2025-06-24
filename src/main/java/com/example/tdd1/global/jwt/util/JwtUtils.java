@@ -1,6 +1,7 @@
 package com.example.tdd1.global.jwt.util;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,13 +21,22 @@ public class JwtUtils {
     }
 
     public Claims extractPayload(String token) {
-        return Jwts
-                // secretKey를 이용하여 파싱
-                .parser().verifyWith(secretKey)
-                // token 값을 이용
-                .build().parseSignedClaims(token)
-                // payload 추출
-                .getPayload();
+        if (token == null || token.isBlank()) {
+            throw new IllegalArgumentException("JWT token is null or empty");
+        }
+
+        try {
+            return Jwts
+                    // secretKey를 이용하여 파싱
+                    .parser().verifyWith(secretKey)
+                    // token 값을 이용
+                    .build().parseSignedClaims(token)
+                    // payload 추출
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰의 클레임 수동 추출
+            return e.getClaims();
+        }
     }
 
     public String getCategory(String token) {

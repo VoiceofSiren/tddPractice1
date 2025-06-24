@@ -1,6 +1,7 @@
 package com.example.tdd1.global.jwt.util;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class CookieUtils {
     /**
@@ -12,8 +13,23 @@ public class CookieUtils {
     public static Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
         // cookie.setSecure(true);             // HTTPS 설정
-        cookie.setMaxAge(24 * 60 * 60);     // 만료 시간: 24h
+        cookie.setMaxAge(1 * 60 * 60);      // 만료 시간: 1h
         cookie.setHttpOnly(true);           // JS 공격 방지
+        cookie.setPath("/");
         return cookie;
+    }
+
+    public static String getRefreshTokenFromCookie(HttpServletRequest request) {
+        String refreshToken = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        return refreshToken;
     }
 }

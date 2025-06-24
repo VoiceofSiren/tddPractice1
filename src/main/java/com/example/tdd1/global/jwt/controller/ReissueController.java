@@ -1,9 +1,11 @@
 package com.example.tdd1.global.jwt.controller;
 
+import com.example.tdd1.global.jwt.exception.JwtCategoryNonMatchingException;
+import com.example.tdd1.global.jwt.exception.JwtExpiredException;
+import com.example.tdd1.global.jwt.exception.JwtNonExistingException;
+import com.example.tdd1.global.jwt.exception.JwtNullException;
+import com.example.tdd1.global.jwt.service.RefreshTokenService;
 import com.example.tdd1.global.jwt.util.CookieUtils;
-import com.example.tdd1.global.jwt.util.JwtUtils;
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,54 +14,35 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 public class ReissueController {
 
-    private final JwtUtils jwtUtils;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 
         // Get refresh token
-        String refreshToken = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie: cookies) {
-            if (cookie.getName().equals("refreshToken")) {
-                refreshToken = cookie.getValue();
-            }
-        }
+        String refreshToken = CookieUtils.getRefreshTokenFromCookie(request);
 
-        if (refreshToken == null || refreshToken.isBlank()) {
-
-            return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
-        }
-
-        // Check expiration
         try {
-            jwtUtils.expires(refreshToken);
-        } catch (ExpiredJwtException e) {
-
-            return new ResponseEntity<>("refresh token expires", HttpStatus.BAD_REQUEST);
+            refreshTokenService.validate(refreshToken);
+        } catch (JwtNullException | JwtNonExistingException | JwtExpiredException | JwtCategoryNonMatchingException exception) {
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        // Check category
-        if (!jwtUtils.getCategory(refreshToken).equals("refresh")) {
+        // Reissue access token and refresh token
+        // Delete old refresh token
+        Map<String, String> reissuedTokens = refreshTokenService.reissueTokens(refreshToken);
 
-            return new ResponseEntity<>("category does not match", HttpStatus.BAD_REQUEST);
-
-        }
-
-        String username = jwtUtils.getUsername(refreshToken);
-        String role = jwtUtils.getRole(refreshToken);
-
-        // Reissue new access token
-        String newAccessToken = jwtUtils.issueJwt("access", username, role, 600000L);       // 만료 시간: 10m
-        String newRefreshToken = jwtUtils.issueJwt("refresh", username, role, 86400000L);   // 만료 시간: 24h
-
-        response.setHeader("access", newAccessToken);
-        response.addCookie(CookieUtils.createCookie("refresh", newRefreshToken));
+        // Add to response
+        response.setHeader("accessToken", reissuedTokens.get("newAccessToken"));
+        response.addCookie(CookieUtils.createCookie("refreshToken", reissuedTokens.get("newRefreshToken")));
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
 }

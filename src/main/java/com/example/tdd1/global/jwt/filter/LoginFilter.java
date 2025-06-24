@@ -1,6 +1,8 @@
 package com.example.tdd1.global.jwt.filter;
 
+import com.example.tdd1.global.jwt.service.RefreshTokenService;
 import com.example.tdd1.global.jwt.util.CookieUtils;
+import com.example.tdd1.global.jwt.util.JwtConstants;
 import com.example.tdd1.global.jwt.util.JwtUtils;
 import com.example.tdd1.user.dto.CustomUserDetails;
 import com.example.tdd1.user.dto.request.UserLoginRequestDto;
@@ -8,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -28,10 +29,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
+    private final RefreshTokenService refreshTokenService;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+    public LoginFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils, RefreshTokenService refreshTokenService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
+        this.refreshTokenService = refreshTokenService;
         setFilterProcessesUrl("/auth/logIn");
     }
 
@@ -69,9 +72,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         String role = authorities.stream().findFirst().get().getAuthority();
 
-        String accessToken = jwtUtils.issueJwt("access", username, role, 600000L);       // 만료 시간: 10m
-        String refreshToken = jwtUtils.issueJwt("refresh", username, role, 86400000L);   // 만료 시간: 24h
-        System.out.println("AccessToken and refreshToken are issued.");
+        String accessToken = jwtUtils.issueJwt("access", username, role, JwtConstants.ACCESS_TOKEN_EXPIRATION);
+        String refreshToken = jwtUtils.issueJwt("refresh", username, role, JwtConstants.REFRESH_TOKEN_EXPIRATION);
+
+        // Refresh token 저장
+        refreshTokenService.addRefreshTokenEntity(username, refreshToken, JwtConstants.REFRESH_TOKEN_EXPIRATION);
 
         response.addHeader("accessToken", accessToken);
         response.addCookie(CookieUtils.createCookie("refreshToken", refreshToken));
