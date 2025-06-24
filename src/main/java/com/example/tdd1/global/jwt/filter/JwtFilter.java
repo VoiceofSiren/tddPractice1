@@ -34,13 +34,13 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Access Token 만료 여부 확인
-        // 다음 단계의 필터로 넘기지 않음.
-        try {
-            jwtUtils.expires(accessToken);
-        } catch (ExpiredJwtException e) {
+        // 토큰 종류가 Access Token인지 확인
+        // 다음 필터로 넘기지 않음.
+        if (!jwtUtils.getCategory(accessToken).equals("access")) {
+
+            // Response Body
             PrintWriter writer = response.getWriter();
-            writer.print("JwtFilter: access token expired");
+            writer.print("JwtFilter: invalid access token");
 
             // Response Status Code
             // Front-end 측과 협의된 상태 코드 필요
@@ -48,18 +48,18 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 토큰 종류가 Access Token인지 확인
-        // 다음 필터로 넘기지 않음.
-        if (!jwtUtils.getCategory(accessToken).equals("access")) {
+        // Access Token 만료 여부 확인
+        // 다음 단계의 필터로 넘기지 않음.
+        if (jwtUtils.expires(accessToken) ) {
+            if (jwtUtils.expires(refreshToken)) {
+                PrintWriter writer = response.getWriter();
+                writer.print("JwtFilter: both access token and refresh token expired");
 
-            // Response Body
-            PrintWriter writer = response.getWriter();
-            writer.print("invalid access token");
-
-            // Response Status Code
-            // Front-end 측과 협의된 상태 코드 필요
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+                // Response Status Code
+                // Front-end 측과 협의된 상태 코드 필요
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
         }
 
         setAuthentication(accessToken);
