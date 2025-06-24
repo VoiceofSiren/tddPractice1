@@ -2,6 +2,7 @@ package com.example.tdd1.global.config;
 
 import com.example.tdd1.global.jwt.filter.JwtFilter;
 import com.example.tdd1.global.jwt.filter.LoginFilter;
+import com.example.tdd1.global.jwt.service.RefreshTokenService;
 import com.example.tdd1.global.jwt.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,7 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtils jwtUtils;
+    private final RefreshTokenService refreshTokenService;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -39,13 +41,13 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/reissue").permitAll()
+                        .requestMatchers("/users/**").authenticated()
                         .anyRequest().authenticated());
 
         http
                 .addFilterBefore(new JwtFilter(jwtUtils), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils), UsernamePasswordAuthenticationFilter.class);;
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, refreshTokenService), UsernamePasswordAuthenticationFilter.class);;
 
         http
                 .sessionManagement(session -> session
