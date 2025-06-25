@@ -19,6 +19,14 @@ public class CookieUtils {
         return cookie;
     }
 
+    public static Cookie removeRefresh() {
+        //Refresh 토큰 Cookie 값 0
+        Cookie cookie = new Cookie("refresh", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        return cookie;
+    }
+
     public static String getRefreshTokenFromCookie(HttpServletRequest request) {
         String refreshToken = null;
         Cookie[] cookies = request.getCookies();
