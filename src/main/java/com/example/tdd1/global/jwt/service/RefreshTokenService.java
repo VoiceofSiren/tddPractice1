@@ -8,6 +8,7 @@ import com.example.tdd1.global.jwt.exception.JwtNullException;
 import com.example.tdd1.global.jwt.repository.RefreshTokenRepository;
 import com.example.tdd1.global.jwt.util.JwtConstants;
 import com.example.tdd1.global.jwt.util.JwtUtils;
+import com.example.tdd1.global.redis.service.RedisSingleDataService;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
+    private final RedisSingleDataService redisSingleDataService;
     private final JwtUtils jwtUtils;
 
     public void validate(String refreshToken) throws JwtNonExistingException, JwtExpiredException, JwtCategoryNonMatchingException, JwtNullException {
@@ -38,11 +40,14 @@ public class RefreshTokenService {
         }
 
         // Check if category is "refresh"
-        if (!jwtUtils.getCategory(refreshToken).equals("refresh")) {
+        if (!jwtUtils.getCategory(refreshToken).equals(JwtConstants.REFRESH_TOKEN_CATEGORY)) {
             throw new JwtCategoryNonMatchingException("category does not match");
         }
 
         // Check if refresh token is stored in DB
+        //  [1] Check by redis first.
+        String username = jwtUtils.getUsername(refreshToken);
+        redisSingleDataService.getSingleData(username);
         Boolean refreshExists = refreshTokenRepository.existsByRefresh(refreshToken);
         if (!refreshExists) {
             throw new JwtNonExistingException("invalid refresh token");
@@ -55,8 +60,8 @@ public class RefreshTokenService {
         String role = jwtUtils.getRole(refreshToken);
 
         // Reissue tokens
-        String newAccessToken = jwtUtils.issueJwt("access", username, role, JwtConstants.ACCESS_TOKEN_EXPIRATION);
-        String newRefreshToken = jwtUtils.issueJwt("refresh", username, role, JwtConstants.REFRESH_TOKEN_EXPIRATION);
+        String newAccessToken = jwtUtils.issueJwt(JwtConstants.ACCESS_TOKEN_CATEGORY, username, role, JwtConstants.ACCESS_TOKEN_EXPIRATION);
+        String newRefreshToken = jwtUtils.issueJwt(JwtConstants.REFRESH_TOKEN_CATEGORY, username, role, JwtConstants.REFRESH_TOKEN_EXPIRATION);
 
         // Delete old refresh token
         refreshTokenRepository.deleteOldRefreshToken(refreshToken);
@@ -81,7 +86,5 @@ public class RefreshTokenService {
 
         refreshTokenRepository.save(refreshToken);
     }
-
-
 
 }

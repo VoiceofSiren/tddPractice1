@@ -6,6 +6,7 @@ import com.example.tdd1.global.jwt.exception.JwtNonExistingException;
 import com.example.tdd1.global.jwt.exception.JwtNullException;
 import com.example.tdd1.global.jwt.service.RefreshTokenService;
 import com.example.tdd1.global.jwt.util.CookieUtils;
+import com.example.tdd1.global.jwt.util.JwtConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +40,8 @@ public class ReissueController {
         Map<String, String> reissuedTokens = refreshTokenService.reissueTokens(refreshToken);
 
         // Add to response
-        response.setHeader("accessToken", reissuedTokens.get("newAccessToken"));
-        response.addCookie(CookieUtils.createCookie("refreshToken", reissuedTokens.get("newRefreshToken")));
+        response.setHeader(JwtConstants.ACCESS_TOKEN_HEADER_NAME, reissuedTokens.get("newAccessToken"));
+        response.addCookie(CookieUtils.createCookie(JwtConstants.REFRESH_TOKEN_COOKIE_NAME, reissuedTokens.get("newRefreshToken")));
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

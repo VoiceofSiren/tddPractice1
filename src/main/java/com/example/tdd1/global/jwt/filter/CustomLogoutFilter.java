@@ -2,6 +2,7 @@ package com.example.tdd1.global.jwt.filter;
 
 import com.example.tdd1.global.jwt.repository.RefreshTokenRepository;
 import com.example.tdd1.global.jwt.util.CookieUtils;
+import com.example.tdd1.global.jwt.util.JwtConstants;
 import com.example.tdd1.global.jwt.util.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -50,7 +51,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         if (    refreshToken == null ||                                         // Check null
                 jwtUtils.expires(refreshToken) ||                           // Check expiration
-                !jwtUtils.getCategory(refreshToken).equals("refresh") ||    // Check category
+                !jwtUtils.getCategory(refreshToken).equals(JwtConstants.REFRESH_TOKEN_CATEGORY) ||    // Check category
                 !refreshTokenRepository.existsByRefresh(refreshToken)) {    // Check db
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;

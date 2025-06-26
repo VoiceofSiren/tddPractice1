@@ -72,14 +72,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         String role = authorities.stream().findFirst().get().getAuthority();
 
-        String accessToken = jwtUtils.issueJwt("access", username, role, JwtConstants.ACCESS_TOKEN_EXPIRATION);
-        String refreshToken = jwtUtils.issueJwt("refresh", username, role, JwtConstants.REFRESH_TOKEN_EXPIRATION);
+        String accessToken = jwtUtils.issueJwt(JwtConstants.ACCESS_TOKEN_CATEGORY, username, role, JwtConstants.ACCESS_TOKEN_EXPIRATION);
+        String refreshToken = jwtUtils.issueJwt(JwtConstants.REFRESH_TOKEN_CATEGORY, username, role, JwtConstants.REFRESH_TOKEN_EXPIRATION);
 
         // Refresh token 저장
         refreshTokenService.addRefreshTokenEntity(username, refreshToken, JwtConstants.REFRESH_TOKEN_EXPIRATION);
 
-        response.addHeader("accessToken", accessToken);
-        response.addCookie(CookieUtils.createCookie("refreshToken", refreshToken));
+        response.addHeader(JwtConstants.ACCESS_TOKEN_HEADER_NAME, accessToken);
+        response.addCookie(CookieUtils.createCookie(JwtConstants.REFRESH_TOKEN_COOKIE_NAME, refreshToken));
         response.setStatus(HttpStatus.OK.value());
 
     }

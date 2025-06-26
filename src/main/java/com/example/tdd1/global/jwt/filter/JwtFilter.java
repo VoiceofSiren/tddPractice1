@@ -1,6 +1,7 @@
 package com.example.tdd1.global.jwt.filter;
 
 import com.example.tdd1.global.jwt.util.CookieUtils;
+import com.example.tdd1.global.jwt.util.JwtConstants;
 import com.example.tdd1.global.jwt.util.JwtUtils;
 import com.example.tdd1.user.dto.CustomUserDetails;
 import com.example.tdd1.user.entity.User;
@@ -25,7 +26,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String accessToken = request.getHeader("accessToken");
+        String accessToken = request.getHeader(JwtConstants.ACCESS_TOKEN_HEADER_NAME);
         String refreshToken = CookieUtils.getRefreshTokenFromCookie(request);
 
         if (accessToken == null) {
@@ -36,7 +37,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 토큰 종류가 Access Token인지 확인
         // 다음 필터로 넘기지 않음.
-        if (!jwtUtils.getCategory(accessToken).equals("access")) {
+        if (!jwtUtils.getCategory(accessToken).equals(JwtConstants.ACCESS_TOKEN_CATEGORY)) {
 
             // Response Body
             PrintWriter writer = response.getWriter();
