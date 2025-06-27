@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
@@ -23,10 +24,10 @@ import java.util.Map;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final Duration refreshTokenTTL = Duration.ofSeconds(JwtConstants.REFRESH_TOKEN_EXPIRATION);
     private final RedisSingleDataService redisSingleDataService;
     private final JwtUtils jwtUtils;
 
+    @Transactional
     public void validate(String refreshToken) throws JwtNonExistingException, JwtExpiredException, JwtCategoryNonMatchingException, JwtNullException {
         // Check existence
         if (refreshToken == null || refreshToken.isBlank()) {
@@ -49,10 +50,14 @@ public class RefreshTokenService {
         // Check if refresh token is stored in DB
         //  [1] Check by redis first.
         String username = jwtUtils.getUsername(refreshToken);
-        redisSingleDataService.getSingleData(username);
-        Boolean refreshExists = refreshTokenRepository.existsByRefresh(refreshToken);
-        if (!refreshExists) {
-            throw new JwtNonExistingException("invalid refresh token");
+        String refreshTokenInMemory = redisSingleDataService.getSingleData(username);
+        if (refreshTokenInMemory == null) {
+            // [2] Check by rdb if refresh token is not found by redis.
+            Boolean refreshExistsInRdb = refreshTokenRepository.existsByRefresh(refreshToken);
+            if (!refreshExistsInRdb) {
+                throw new JwtNonExistingException("invalid refresh token");
+            }
+            redisSingleDataService.setSingleData(username, refreshToken, Duration.ofDays(1));
         }
     }
 
@@ -65,7 +70,10 @@ public class RefreshTokenService {
         String newAccessToken = jwtUtils.issueJwt(JwtConstants.ACCESS_TOKEN_CATEGORY, username, role, JwtConstants.ACCESS_TOKEN_EXPIRATION);
         String newRefreshToken = jwtUtils.issueJwt(JwtConstants.REFRESH_TOKEN_CATEGORY, username, role, JwtConstants.REFRESH_TOKEN_EXPIRATION);
 
-        // Delete old refresh token
+        // Delete old refresh token from memory
+        redisSingleDataService.deleteSingleData(refreshToken);
+
+        // Delete old refresh token from RDB
         refreshTokenRepository.deleteOldRefreshToken(refreshToken);
 
         // Store new refresh token into DB
@@ -77,6 +85,7 @@ public class RefreshTokenService {
     @Transactional
     public void storeRefreshToken(String username, String refresh, Long expirationMs) {
         Date date = new Date(System.currentTimeMillis() + expirationMs);
+        Duration timeToLiveMs = Duration.ofMillis(System.currentTimeMillis() + expirationMs);
 
         System.out.println("now: " + new Date(System.currentTimeMillis()));
         System.out.println("exp: " + date);
@@ -84,7 +93,7 @@ public class RefreshTokenService {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUsername(username);
         refreshToken.setRefresh(refresh);
-        refreshToken.setExpiration(date.toString());
+        refreshToken.setExpiration(Instant.now().plus(timeToLiveMs).toString());
 
         refreshTokenRepository.save(refreshToken);
     }
