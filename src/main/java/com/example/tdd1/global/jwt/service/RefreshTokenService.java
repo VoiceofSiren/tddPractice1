@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import java.util.Map;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
+    private final Duration refreshTokenTTL = Duration.ofSeconds(JwtConstants.REFRESH_TOKEN_EXPIRATION);
     private final RedisSingleDataService redisSingleDataService;
     private final JwtUtils jwtUtils;
 
@@ -67,13 +69,13 @@ public class RefreshTokenService {
         refreshTokenRepository.deleteOldRefreshToken(refreshToken);
 
         // Store new refresh token into DB
-        addRefreshTokenEntity(username, newRefreshToken, JwtConstants.REFRESH_TOKEN_EXPIRATION);
+        storeRefreshToken(username, newRefreshToken, JwtConstants.REFRESH_TOKEN_EXPIRATION);
 
         return Map.of("newAccessToken", newAccessToken, "newRefreshToken", newRefreshToken);
     }
 
     @Transactional
-    public void addRefreshTokenEntity(String username, String refresh, Long expirationMs) {
+    public void storeRefreshToken(String username, String refresh, Long expirationMs) {
         Date date = new Date(System.currentTimeMillis() + expirationMs);
 
         System.out.println("now: " + new Date(System.currentTimeMillis()));

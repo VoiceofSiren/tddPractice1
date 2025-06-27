@@ -76,7 +76,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String refreshToken = jwtUtils.issueJwt(JwtConstants.REFRESH_TOKEN_CATEGORY, username, role, JwtConstants.REFRESH_TOKEN_EXPIRATION);
 
         // Refresh token 저장
-        refreshTokenService.addRefreshTokenEntity(username, refreshToken, JwtConstants.REFRESH_TOKEN_EXPIRATION);
+        refreshTokenService.storeRefreshToken(username, refreshToken, JwtConstants.REFRESH_TOKEN_EXPIRATION);
 
         response.addHeader(JwtConstants.ACCESS_TOKEN_HEADER_NAME, accessToken);
         response.addCookie(CookieUtils.createCookie(JwtConstants.REFRESH_TOKEN_COOKIE_NAME, refreshToken));
